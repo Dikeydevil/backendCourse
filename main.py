@@ -1,8 +1,7 @@
-from fastapi import FastAPI, Query, Body
-from typing import Optional
+from fastapi import FastAPI
 import uvicorn
 
-from hotels import hotels as router_hotels
+from hotels import router as router_hotels
 app = FastAPI()
 app.include_router(router_hotels)
 
