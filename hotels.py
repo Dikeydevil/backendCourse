@@ -1,19 +1,24 @@
-from fastapi import Query, Body, APIRouter
-from typing import Optional
-from pydantic import BaseModel
+from fastapi import Query, APIRouter, Body
+from schemas.hotels import Hotel, HotelPATCH
+
 
 router = APIRouter(prefix="/hotels", tags=["Отели"])
 
 hotels = [
     {"id": 1, "title": "Sochi", "name": "sochi"},
-    {"id": 2, "title": "Dubai", "name": "dubai"},
+    {"id": 2, "title": "Дубай", "name": "dubai"},
+    {"id": 3, "title": "Мальдивы", "name": "maldivi"},
+    {"id": 4, "title": "Геленджик", "name": "gelendzhik"},
+    {"id": 5, "title": "Москва", "name": "moscow"},
+    {"id": 6, "title": "Казань", "name": "kazan"},
+    {"id": 7, "title": "Санкт-Петербург", "name": "spb"},
 ]
 
 @router.get("", summary="Получить данные об отелях",
          description="<UNK> <UNK> <UNK> <UNK>")
 def get_hotels(
-    id: Optional[int] = Query(default=None, description="Айдишник"),
-    title: Optional[str] = Query(default=None, description="Название отеля"),
+    id: int | None = Query(default=None, description="Айдишник"),
+    title: str | None = Query(default=None, description="Название отеля"),
 ):
     hotels_ = []
     for hotel in hotels:
@@ -24,13 +29,21 @@ def get_hotels(
         hotels_.append(hotel)
     return hotels_
 
-class Hotel(BaseModel):
-    title: str
-    name: str
+
 
 @router.post("", summary="Создание нового отеля",
-          description="<UNK> <UNK> <UNK> <UNK> <UNK> <UNK>")
-def create_hotel(hotel_data: Hotel,):
+          description="Создание нового отеля")
+def create_hotel(hotel_data: Hotel = Body(openapi_examples = {
+    "1":{
+        "summary": "Сочи",
+        "value": {
+            "title": "Отель Сочи 5 звезд",
+            "name": "ЛюКС Супер мега крутой отель"
+                }
+        }
+    }
+)
+):
     global hotels
     hotels.append({
         "id": hotels[-1]["id"] + 1,
@@ -54,15 +67,14 @@ def update_hotel_put(
            description="Частичное обновление данных об отеле, Частичное обнволение данных об отеле, Частичное обнволение данных об отеле")
 def update_hotel_patch(
     hotel_id: int,
-    title: Optional[str] = Body(default=None, description="Новое значение title"),
-    name: Optional[str] = Body(default=None, description="Новое значение name")
+        hotel_data: HotelPATCH,
 ):
     for hotel in hotels:
         if hotel["id"] == hotel_id:
-            if title is not None:
-                hotel["title"] = title
-            if name is not None:
-                hotel["name"] = name
+            if hotel_data.title is not None:
+                hotel["title"] = hotel_data.title
+            if hotel_data.name is not None:
+                hotel["name"] = hotel_data.name
             return {"status": "patched", "hotel": hotel}
     return {"status": "not found"}
 
