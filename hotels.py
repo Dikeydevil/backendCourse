@@ -12,6 +12,10 @@ hotels = [
     {"id": 5, "title": "Москва", "name": "moscow"},
     {"id": 6, "title": "Казань", "name": "kazan"},
     {"id": 7, "title": "Санкт-Петербург", "name": "spb"},
+    {"id": 8, "title": "<UNK>", "name": "<UNK>"},
+    {"id": 9, "title": "<UNK>", "name": "<UNK>"},
+    {"id": 10, "title": "<UNK>", "name": "<UNK>"},
+    {"id": 11, "title": "<UNK>", "name": "<UNK>"},
 ]
 
 @router.get("", summary="Получить данные об отелях",
@@ -19,15 +23,20 @@ hotels = [
 def get_hotels(
     id: int | None = Query(default=None, description="Айдишник"),
     title: str | None = Query(default=None, description="Название отеля"),
+    page: int = Query(default=1, ge=1, description="Номер страницы"),
+    per_page: int = Query(default=10, ge=1, le=100, description="Количество элементов на страницу"),
 ):
     hotels_ = []
     for hotel in hotels:
-        if id and hotel["id"] != id:
+        if id is not None and hotel["id"] != id:
             continue
-        if title and hotel["title"] != title:
+        if title is not None and hotel["title"] != title:
             continue
         hotels_.append(hotel)
-    return hotels_
+
+    start = (page - 1) * per_page
+    end = start + per_page
+    return hotels_[start:end]
 
 
 
