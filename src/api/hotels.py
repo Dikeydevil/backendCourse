@@ -14,20 +14,25 @@ router = APIRouter(prefix="/hotels", tags=["Отели"])
 
 
 @router.get("", summary="Получить данные об отелях",
-         description="<UNK> <UNK> <UNK> <UNK>")
+            description="Поиск отелей по названию и локации с частичным совпадением")
 async def get_hotels(
     pagination: PaginationDep,
-    id: int | None = Query(default=None, description="Айдишник"),
+    location: str | None = Query(default=None, description="Локация отеля"),
     title: str | None = Query(default=None, description="Название отеля"),
-
 ):
     per_page = pagination.per_page or 5
     async with async_session_maker() as session:
         query = select(HotelsOrm)
-        if id:
-            query= query.filter_by(id=id)
+
+        filters = []
+        if location:
+            filters.append(HotelsOrm.location.ilike(f"%{location}%"))
         if title:
-            query= query.filter_by(title=title)
+            filters.append(HotelsOrm.title.ilike(f"%{title}%"))
+
+        if filters:
+            query = query.filter(*filters)
+
         query = (
             query
             .limit(per_page)
@@ -35,9 +40,7 @@ async def get_hotels(
         )
         result = await session.execute(query)
         hotels = result.scalars().all()
-        print(type(hotels), hotels)
-    #if pagination.page and pagination.per_page:
-    #    return hotels_[pagination.per_page * (pagination.page - 1):][:pagination.per_page]
+
     return hotels
 
 
