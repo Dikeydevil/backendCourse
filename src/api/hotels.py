@@ -1,12 +1,13 @@
 from fastapi import Query, APIRouter, Body
 
-from sqlalchemy import insert, select
+from sqlalchemy import insert, select, func
 
 from src.database import engine
 from src.api.dependecies import PaginationDep
 from src.database import async_session_maker
 from src.models.hotels import HotelsOrm
 from src.models.rooms import RoomsOrm
+from src.repositories.hotels import HotelsRepository
 from src.schemas.hotels import Hotel, HotelPATCH
 
 
@@ -20,28 +21,30 @@ async def get_hotels(
     location: str | None = Query(default=None, description="Локация отеля"),
     title: str | None = Query(default=None, description="Название отеля"),
 ):
-    per_page = pagination.per_page or 5
     async with async_session_maker() as session:
-        query = select(HotelsOrm)
-
-        filters = []
-        if location:
-            filters.append(HotelsOrm.location.ilike(f"%{location}%"))
-        if title:
-            filters.append(HotelsOrm.title.ilike(f"%{title}%"))
-
-        if filters:
-            query = query.filter(*filters)
-
-        query = (
-            query
-            .limit(per_page)
-            .offset(per_page * (pagination.page - 1))
-        )
-        result = await session.execute(query)
-        hotels = result.scalars().all()
-
-    return hotels
+        return await HotelsRepository(session).get_all()
+    # per_page = pagination.per_page or 5
+    # async with async_session_maker() as session:
+    #     query = select(HotelsOrm)
+    #
+    #     filters = []
+    #     if location:
+    #         filters.append(HotelsOrm.location.ilike(f"%{location}%"))
+    #     if title:
+    #         filters.append(HotelsOrm.title.ilike(f"%{title}%"))
+    #     if filters:
+    #         query = query.filter(*filters)
+    #
+    #     query = (
+    #         query
+    #         .limit(per_page)
+    #         .offset(per_page * (pagination.page - 1))
+    #     )
+    #     print(query.compile(compile_kwargs={"literal_binds": True}))
+    #     result = await session.execute(query)
+    #     hotels = result.scalars().all()
+    #
+    # return hotels
 
 
 
