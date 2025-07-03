@@ -68,18 +68,14 @@ async def edit_hotel(hotel_id: int, hotel_data: Hotel):
 @router.patch("/{hotel_id}",
            summary="Частичное обновление данных об отеле",
            description="Частичное обновление данных об отеле, Частичное обнволение данных об отеле, Частичное обнволение данных об отеле")
-def update_hotel_patch(
-    hotel_id: int,
-        hotel_data: HotelPATCH,
+async def partially_edit_hotel(
+        hotel_id: int,
+        otel_data: HotelPATCH
 ):
-    for hotel in hotels:
-        if hotel["id"] == hotel_id:
-            if hotel_data.title is not None:
-                hotel["title"] = hotel_data.title
-            if hotel_data.name is not None:
-                hotel["name"] = hotel_data.name
-            return {"status": "patched", "hotel": hotel}
-    return {"status": "not found"}
+    async with async_session_maker() as session:
+        await HotelsRepository(session).edit(otel_data, exclude_unset=True, id=hotel_id)
+        await session.commit()
+    return {"status": "OK"}
 
 
 @router.delete("/{hotel_id}")
