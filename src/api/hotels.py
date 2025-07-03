@@ -57,25 +57,12 @@ async def create_hotel(hotel_data: Hotel = Body(openapi_examples = {
 
     return {"status": "OK", "data": hotel}
 
-@router.put("/{hotel_id}", summary="Обновление данных об отеле")
-async def update_hotel_put(
-    hotel_id: int,
-    hotel_data: Hotel = Body(...),
-):
+@router.put("/{hotel_id}")
+async def edit_hotel(hotel_id: int, hotel_data: Hotel):
     async with async_session_maker() as session:
-        repo = HotelsRepository(session)
-
-        # проверим, что отель есть
-        existing = await repo.get_one_or_none(id=hotel_id)
-        if not existing:
-            raise HTTPException(status_code=404, detail="Hotel not found")
-
-        await repo.edit(hotel_data, id=hotel_id)
+        await HotelsRepository(session).edit(hotel_data, id=hotel_id)
         await session.commit()
-
-        # можно вернуть обновлённый объект:
-        updated = await repo.get_one_or_none(id=hotel_id)
-        return {"status": "updated", "hotel": updated}
+    return {"status": "OK"}
 
 
 @router.patch("/{hotel_id}",
@@ -95,18 +82,9 @@ def update_hotel_patch(
     return {"status": "not found"}
 
 
-@router.delete("/{hotel_id}", summary="Удалить отель")
-async def delete_hotel(
-    hotel_id: int,
-):
+@router.delete("/{hotel_id}")
+async def delete_hotel(hotel_id: int):
     async with async_session_maker() as session:
-        repo = HotelsRepository(session)
-
-        existing = await repo.get_one_or_none(id=hotel_id)
-        if not existing:
-            raise HTTPException(status_code=404, detail="Hotel not found")
-
-        await repo.delete(id=hotel_id)
+        await HotelsRepository(session).delete(id=hotel_id)
         await session.commit()
-
-        return {"status": "deleted"}
+    return {"status": "OK"}

@@ -7,3 +7,4 @@ class Hotel(BaseModel):
 class HotelPATCH(BaseModel):
     title: str | None = Field(default=None, description="Новое значение title")
     location: str | None = Field(default=None, description="Новое значение name")
+    
