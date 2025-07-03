@@ -1,12 +1,8 @@
-from fastapi import Query, APIRouter, Body, HTTPException
+from fastapi import Query, APIRouter, Body
 
-from sqlalchemy import insert, select, func
 
-from src.database import engine
 from src.api.dependecies import PaginationDep
 from src.database import async_session_maker
-from src.models.hotels import HotelsOrm
-from src.models.rooms import RoomsOrm
 from src.repositories.hotels import HotelsRepository
 from src.schemas.hotels import Hotel, HotelPATCH
 
