@@ -1,8 +1,11 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
-class Hotel(BaseModel):
+class HotelAdd(BaseModel):
     title: str = Field(description="title of hotel")
     location: str = Field(description="name of hotel")
+
+class Hotel(HotelAdd):
+    id: int
 
 class HotelPATCH(BaseModel):
     title: str | None = Field(default=None, description="Новое значение title")
