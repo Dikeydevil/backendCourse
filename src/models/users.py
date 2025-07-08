@@ -11,4 +11,4 @@ class UsersOrm(Base):
     username: Mapped[str] = mapped_column(String(100))
     firstname: Mapped[str] = mapped_column(String(100))
     lastname: Mapped[str] = mapped_column(String(100))
-    password: Mapped[str] = mapped_column(String(256))
+    hashed_password: Mapped[str] = mapped_column(String(256))
