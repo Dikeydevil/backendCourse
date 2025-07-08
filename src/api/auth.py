@@ -7,7 +7,6 @@ from src.schemas.users import UserRequestAdd, UserAdd
 
 router = APIRouter(prefix="/auth", tags=["Авторизация и аутентификация"])
 
-# Теперь используем Argon2
 pwd_context = CryptContext(
     schemes=["argon2"],
     default="argon2",
