@@ -50,7 +50,7 @@ async def login_user(
 
 @router.post("/logout")
 async def logout(response: Response,):
-    response.delete_cookie("bearer")
+    response.delete_cookie("access_token")
     return {"status":"success"}
 
 @router.get("/me")
