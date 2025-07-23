@@ -20,7 +20,22 @@ async def get_room(hotel_id: int, room_id: int):
 
 
 @router.post("/{hotel_id}/rooms")
-async def create_room(hotel_id: int, room_data: RoomAddRequest = Body()):
+async def create_room(
+    hotel_id: int,
+    room_data: RoomAddRequest = Body(
+        examples={
+            "default": {
+                "summary": "Пример создания комнаты",
+                "value": {
+                    "title": "Стандартный номер",
+                    "description": "Номер с одной кроватью и видом на город",
+                    "price": 4500,
+                    "quantity": 5
+                }
+            }
+        }
+    )
+):
     _room_data = RoomAdd(hotel_id=hotel_id, **room_data.model_dump())
     async with async_session_maker() as session:
         room = await RoomsRepository(session).add(_room_data)
@@ -29,7 +44,23 @@ async def create_room(hotel_id: int, room_data: RoomAddRequest = Body()):
 
 
 @router.put("/{hotel_id}/rooms/{room_id}")
-async def edit_room(hotel_id: int, room_id: int, room_data: RoomAddRequest):
+async def edit_room(
+    hotel_id: int,
+    room_id: int,
+    room_data: RoomAddRequest = Body(
+        examples={
+            "default": {
+                "summary": "Пример полной замены комнаты",
+                "value": {
+                    "title": "Обновлённый номер",
+                    "description": "Номер с двумя кроватями и балконом",
+                    "price": 5200,
+                    "quantity": 3
+                }
+            }
+        }
+    )
+):
     _room_data = RoomAdd(hotel_id=hotel_id, **room_data.model_dump())
     async with async_session_maker() as session:
         repo = RoomsRepository(session)
@@ -42,7 +73,20 @@ async def edit_room(hotel_id: int, room_id: int, room_data: RoomAddRequest):
 
 
 @router.patch("/{hotel_id}/rooms/{room_id}")
-async def partially_edit_room(hotel_id: int, room_id: int, room_data: RoomPatchRequest):
+async def partially_edit_room(
+    hotel_id: int,
+    room_id: int,
+    room_data: RoomPatchRequest = Body(
+        examples={
+            "default": {
+                "summary": "Пример частичного обновления комнаты",
+                "value": {
+                    "price": 4990
+                }
+            }
+        }
+    )
+):
     _room_data = RoomPatch(hotel_id=hotel_id, **room_data.model_dump(exclude_unset=True))
     async with async_session_maker() as session:
         repo = RoomsRepository(session)
