@@ -1,29 +1,43 @@
-from fastapi import Query, APIRouter, Body
+from datetime import date
 
+from fastapi import Query, APIRouter, Body, HTTPException
 
 from src.api.dependecies import PaginationDep, DBDep
-from src.database import async_session_maker
-from src.repositories.hotels import HotelsRepository
 from src.schemas.hotels import Hotel, HotelPATCH, HotelAdd
 
 router = APIRouter(prefix="/hotels", tags=["Hotels"])
 
 
-@router.get("", summary="Получить данные об отелях",
-            description="Поиск отелей по названию и локации с частичным совпадением")
+@router.get("")
 async def get_hotels(
-        pagination: PaginationDep,
-        db: DBDep,
-        location: str | None = Query(None, description="Локация"),
-        title: str | None = Query(None, description="Название отеля"),
+    pagination: PaginationDep,
+    db: DBDep,
+    location: str | None = Query(None, description="Локация"),
+    title: str | None = Query(None, description="Название отеля"),
+    date_from: date | None = Query(None, description="Дата заезда (включительно)"),
+    date_to: date | None = Query(None, description="Дата выезда (исключительно)"),
 ):
     per_page = pagination.per_page or 5
-    return await db.hotels.get_all(
-        location=location,
-        title=title,
-        limit=per_page,
-        offset=per_page * (pagination.page - 1)
-    )
+    offset = per_page * (pagination.page - 1)
+    if (date_from and not date_to) or (date_to and not date_from):
+        raise HTTPException(status_code=400, detail="Укажите оба параметра: date_from и date_to")
+    if date_from and date_to:
+        return await db.hotels.get_filtered_by_time(
+            date_from=date_from,
+            date_to=date_to,
+            location=location,
+            title=title,
+            limit=per_page,
+            offset=offset,
+        )
+    else:
+        return await db.hotels.search_paginated(
+            location=location,
+            title=title,
+            limit=per_page,
+            offset=offset,
+        )
+
 
 @router.get("/{hotel_id}")
 async def get_hotel(hotel_id: int, db: DBDep):
