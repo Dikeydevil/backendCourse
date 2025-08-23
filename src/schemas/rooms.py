@@ -6,6 +6,7 @@ class RoomAddRequest(BaseModel):
     description: str | None = None
     price: int
     quantity: int
+    facilities_ids: list[int] | None = None
 
 
 class RoomAdd(BaseModel):
@@ -27,6 +28,10 @@ class RoomPatchRequest(BaseModel):
     description: str | None = Field(default=None, description="Описание комнаты")
     price: int | None = Field(default=None, description="Цена за ночь")
     quantity: int | None = Field(default=None, description="Количество доступных номеров")
+    facilities_ids: list[int] | None = Field(
+        default=None,
+        description="Полный список удобств комнаты (заменяет текущие связи m2m)",
+    )
 
 
 class RoomPatch(BaseModel):
