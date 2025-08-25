@@ -5,13 +5,14 @@ from sqlalchemy import select, func, distinct
 from src.models.rooms import RoomsOrm
 from src.repositories.base import BaseRepository
 from src.models.hotels import HotelsOrm
+from src.repositories.mappers.mappers import HotelDataMapper
 from src.repositories.utils import rooms_ids_for_booking
 from src.schemas.hotels import Hotel
 
 
 class HotelsRepository(BaseRepository):
     model = HotelsOrm
-    schema = Hotel
+    mapper = HotelDataMapper
 
     async def search_paginated(
         self,
@@ -32,7 +33,7 @@ class HotelsRepository(BaseRepository):
             )
         query = query.limit(limit).offset(offset)
         result = await self.session.execute(query)
-        return [Hotel.model_validate(h, from_attributes=True) for h in result.scalars().all()]
+        return [self.mapper.map_to_domain_entity(h) for h in result.scalars().all()]
 
     async def get_filtered_by_time(
         self,
@@ -43,6 +44,7 @@ class HotelsRepository(BaseRepository):
         title: str | None,
         limit: int,
         offset: int,
+        # если rooms_ids_for_booking требует hotel_id: добавь сюда hotel_id: int
     ) -> list[Hotel]:
         rooms_ids_to_get = rooms_ids_for_booking(date_from=date_from, date_to=date_to)
         hotels_ids_subq = (
@@ -61,4 +63,4 @@ class HotelsRepository(BaseRepository):
             )
         query = query.limit(limit).offset(offset)
         result = await self.session.execute(query)
-        return [Hotel.model_validate(h, from_attributes=True) for h in result.scalars().all()]
+        return [self.mapper.map_to_domain_entity(h) for h in result.scalars().all()]
